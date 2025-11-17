@@ -32,9 +32,9 @@ aws ecr create-repository --repository-name swiggy-app --region us-east-1
 
 ```
 
-# Step 2 — Jenkins pipeline (CI) — example Jenkinsfile
+# Step 2 — Github Actions 
 
-Place this Jenkinsfile in repo root. It:
+Place this cicd.yml in repo root. It:
 
 Builds Docker image,
 
@@ -87,6 +87,7 @@ kubectl get svc swiggy-app -n default
 ```
 
 ![Pipeline Diagram](images/pipeline.png)
+
 
 
 
