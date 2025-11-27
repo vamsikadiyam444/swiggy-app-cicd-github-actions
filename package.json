@@ -6,13 +6,13 @@
     "Founder",
     "Chakri"
   ],
-  "homepage": "https://github.com/Chakri45446/Swiggy-App#readme",
+  "homepage": "https://vamsikadiyam444.github.io/swiggy-app-cicd-github-actions",
   "bugs": {
-    "url": "https://github.com/Chakri45446/Swiggy-App/issues"
+    "url": "https://github.com/vamsikadiyam444/swiggy-app-cicd-github-actions/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Chakri45446/Swiggy-App.git"
+    "url": "git+https://github.com/vamsikadiyam444/swiggy-app-cicd-github-actions.git"
   },
   "license": "ISC",
   "author": "Chakradara Rao Seelam",
@@ -20,8 +20,10 @@
   "scripts": {
     "start": "parcel index.html",
     "build": "parcel build index.html",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "test": "jest",
-    "watch-test":"jest --watch" 
+    "watch-test": "jest --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.28.3",
@@ -32,7 +34,8 @@
     "babel-jest": "^30.0.5",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
-    "parcel": "^2.15.4"
+    "parcel": "^2.15.4",
+    "gh-pages": "^5.0.0"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
