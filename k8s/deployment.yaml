@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: swiggy-app
+  namespace: swiggy
 spec:
   replicas: 1
   selector:
@@ -14,6 +15,6 @@ spec:
     spec:
       containers:
         - name: swiggy-app
-          image: docker.io/vamsikrishna212/swiggy-app:18ce357fa52b0008c4a207f51920a4bee9a82883
+          image: 596660701410.dkr.ecr.us-east-1.amazonaws.com/swiggy-app:18ce357fa52b0008c4a207f51920a4bee9a82883
           ports:
            - containerPort: 80
