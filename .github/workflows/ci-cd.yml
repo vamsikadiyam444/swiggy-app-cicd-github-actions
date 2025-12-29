@@ -8,80 +8,82 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: docker.io
-  REPOSITORY: vamsikrishna212/swiggy-app
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: 596660701410.dkr.ecr.us-east-1.amazonaws.com/swiggy-app
+  K8S_MANIFEST_PATH: ./k8s/deployment.yaml
+  K8S_NAMESPACE: swiggy  # Your Kubernetes namespace
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      # 1️⃣ Checkout repo using PAT so we can push updates
+      # 1 Checkout repository using PAT
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      # 2️⃣ Setup Node.js
+      # 2 Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # 3️⃣ Install dependencies
+      # 3 Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Run tests
+      # 4 Run tests
       - name: Run tests
         run: npm test
 
-      # 5️⃣ Build project
+      # 5 Build project
       - name: Build project
         run: npm run build
 
-      # 6️⃣ Log in to Docker Hub
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      # 6 Configure AWS credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # 7️⃣ Set IMAGE_TAG to Git commit SHA
-      - name: Set IMAGE_TAG
-        run: echo "IMAGE_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
+      # 7 Log in to Amazon ECR
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-      # 8️⃣ Build and push Docker image
+      # 8 Build and push Docker image to ECR
       - name: Build and push Docker image
         run: |
-          echo "Building image: $REGISTRY/$REPOSITORY:$IMAGE_TAG"
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          IMAGE_TAG=${GITHUB_SHA}
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REPOSITORY:$IMAGE_TAG
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-      # 9️⃣ Update deployment.yaml with IMAGE_TAG
+      # 9 Update Kubernetes manifest with new image tag
       - name: Update Kubernetes manifest
         run: |
-          MANIFEST_PATH=./k8s/deployment.yaml
-          if [ -f "$MANIFEST_PATH" ]; then
-            sed -i "s|IMAGE_TAG|$IMAGE_TAG|g" "$MANIFEST_PATH"
-            echo "✅ Updated deployment.yaml with tag $IMAGE_TAG"
-            cat "$MANIFEST_PATH"
+          if [ -f "$K8S_MANIFEST_PATH" ]; then
+            sed -i "s|IMAGE_TAG|${IMAGE_TAG}|g" "$K8S_MANIFEST_PATH"
+            echo "Updated deployment.yaml with tag $IMAGE_TAG"
           else
-            echo "❌ Deployment manifest not found at $MANIFEST_PATH"
+            echo "Deployment manifest not found at $K8S_MANIFEST_PATH"
             exit 1
           fi
 
-      # 🔟 Commit & push updated deployment.yaml back using PAT
+      # 10 Commit & push updated deployment.yaml back using PAT
       - name: Commit and push deployment.yaml
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-
-          if ! git diff --quiet ./k8s/deployment.yaml; then
-            git add ./k8s/deployment.yaml
+          if ! git diff --quiet "$K8S_MANIFEST_PATH"; then
+            git add "$K8S_MANIFEST_PATH"
             git commit -m "Update deployment image tag to $IMAGE_TAG"
             git push https://x-access-token:${PAT_TOKEN}@github.com/${{ github.repository }}.git main
           else
-            echo "ℹ️ No changes to commit"
+            echo "No changes to commit"
           fi
