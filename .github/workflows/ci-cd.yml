@@ -11,7 +11,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: 596660701410.dkr.ecr.us-east-1.amazonaws.com/swiggy-app
   K8S_MANIFEST_PATH: ./k8s/deployment.yaml
-  K8S_NAMESPACE: swiggy  # Your Kubernetes namespace
+  K8S_NAMESPACE: swiggy
 
 jobs:
   build-and-deploy:
@@ -86,3 +86,4 @@ jobs:
             git push https://x-access-token:${PAT_TOKEN}@github.com/${{ github.repository }}.git main
           else
             echo "No changes to commit"
+          fi
