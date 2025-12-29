@@ -18,31 +18,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1 Checkout repository using PAT
+      # Checkout repository using PAT
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
-      # 2 Setup Node.js
+      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # 3 Install dependencies
+      # Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4 Run tests
+      # Run tests
       - name: Run tests
         run: npm test
 
-      # 5 Build project
+      # Build project
       - name: Build project
         run: npm run build
 
-      # 6 Configure AWS credentials
+      # Configure AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -50,11 +50,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 7 Log in to Amazon ECR
+      # Log in to Amazon ECR
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 8 Build and push Docker image to ECR
+      # Build and push Docker image to ECR
       - name: Build and push Docker image
         run: |
           IMAGE_TAG=${GITHUB_SHA}
@@ -62,7 +62,7 @@ jobs:
           docker push $ECR_REPOSITORY:$IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-      # 9 Update Kubernetes manifest with new image tag
+      # Update Kubernetes manifest with new image tag
       - name: Update Kubernetes manifest
         run: |
           if [ -f "$K8S_MANIFEST_PATH" ]; then
@@ -73,7 +73,7 @@ jobs:
             exit 1
           fi
 
-      # 10 Commit & push updated deployment.yaml back using PAT
+      # Commit & push updated deployment.yaml back using PAT
       - name: Commit and push deployment.yaml
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -86,4 +86,3 @@ jobs:
             git push https://x-access-token:${PAT_TOKEN}@github.com/${{ github.repository }}.git main
           else
             echo "No changes to commit"
-          fi
