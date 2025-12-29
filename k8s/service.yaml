@@ -6,8 +6,8 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: swiggy-app  # must match Deployment labels
+    app: swiggy-app
   ports:
     - port: 80        # internal cluster port
-      targetPort: 1234 # container port
-      nodePort: 30001 # port on the Minikube node
+      targetPort: 80  # must match containerPort in Deployment
+      nodePort: 30001 # port on the node to expose externally
