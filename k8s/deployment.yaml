@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: swiggy-app
-          image: 596660701410.dkr.ecr.us-east-1.amazonaws.com/swiggy-app:PLACEHOLDER
+          image: 596660701410.dkr.ecr.us-east-1.amazonaws.com/my-app:fc09c4f23d2e2fd104d216058304f15e44c84e4a
           ports:
             - containerPort: 80
           readinessProbe:
