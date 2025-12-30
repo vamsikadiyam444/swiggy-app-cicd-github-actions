@@ -15,12 +15,12 @@ spec:
     spec:
       containers:
         - name: swiggy-app
-          image: 596660701410.dkr.ecr.us-east-1.amazonaws.com/my-app:fc09c4f23d2e2fd104d216058304f15e44c84e4a
+          image: 596660701410.dkr.ecr.us-east-1.amazonaws.com/my-app:PLACEHOLDER
           ports:
-            - containerPort: 80
+            - containerPort: 1234
           readinessProbe:
             httpGet:
               path: /health
-              port: 80
+              port: 1234
             initialDelaySeconds: 5
             periodSeconds: 10
