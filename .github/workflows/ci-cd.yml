@@ -11,7 +11,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: 596660701410.dkr.ecr.us-east-1.amazonaws.com/my-app
   K8S_NAMESPACE: swiggy
-  CLUSTER_NAME: my-eks-cluster
+  CLUSTER_NAME: swiggy-app
   K8S_DEPLOYMENT: swiggy-app
 
 jobs:
@@ -19,63 +19,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup Node.js
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # 3️⃣ Install dependencies
+      # 3. Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Run tests
+      # 4. Run tests
       - name: Run tests
         run: npm test
 
-      # 5️⃣ Build project
+      # 5. Build project
       - name: Build project
         run: npm run build
 
-      # 6️⃣ Configure AWS credentials
+      # 6. Configure AWS credentials (IAM)
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_IAM }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_IAM }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 7️⃣ Login to Amazon ECR
+      # 7. Login to Amazon ECR
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 8️⃣ Build and push Docker image
+      # 8. Build and push Docker image
       - name: Build and push Docker image
         run: |
           IMAGE_TAG=${GITHUB_SHA}
           echo "Using image tag: $IMAGE_TAG"
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REPOSITORY:$IMAGE_TAG
-
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-      # 9️⃣ Update kubeconfig for EKS
-      - name: Update kubeconfig
-        run: |
-          aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
-
-      # 🔟 Replace image in deployment.yaml
+      # 9. Update deployment manifest with new image
       - name: Update deployment image
         run: |
           sed -i "s|image: .*|image: $ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml
 
-      # 1️⃣1️⃣ Apply Kubernetes manifests
-      - name: Deploy to Kubernetes (via ArgoCD)
+      # 10. Update kubeconfig for EKS
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+
+      # 11. Apply Kubernetes manifests
+      - name: Apply Kubernetes manifests
         run: |
-          # Apply manifests to the cluster (ArgoCD can also watch this namespace)
           kubectl apply -f k8s/deployment.yaml -n $K8S_NAMESPACE
           kubectl apply -f k8s/service.yaml -n $K8S_NAMESPACE
