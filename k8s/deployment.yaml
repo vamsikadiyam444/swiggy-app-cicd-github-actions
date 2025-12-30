@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: swiggy-app
-          image: 596660701410.dkr.ecr.us-east-1.amazonaws.com/swiggy-app:18ce357fa52b0008c4a207f51920a4bee9a82883
+          image: 596660701410.dkr.ecr.us-east-1.amazonaws.com/swiggy-app:latest # Placeholder
           ports:
             - containerPort: 80
           readinessProbe:
@@ -24,3 +24,5 @@ spec:
               port: 80
             initialDelaySeconds: 5
             periodSeconds: 10
+      imagePullSecrets:
+        - name: ecr-registry
