@@ -9,5 +9,5 @@ spec:
     app: swiggy-app
   ports:
     - port: 80        # internal cluster port
-      targetPort: 80  # must match containerPort in Deployment
-      nodePort: 30001 # port on the node to expose externally
+      targetPort: 1234  # must match containerPort in Deployment
+      nodePort: 30001 # external port
