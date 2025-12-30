@@ -4,7 +4,7 @@ metadata:
   name: swiggy-app
   namespace: swiggy
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: swiggy-app
@@ -17,4 +17,10 @@ spec:
         - name: swiggy-app
           image: 596660701410.dkr.ecr.us-east-1.amazonaws.com/swiggy-app:18ce357fa52b0008c4a207f51920a4bee9a82883
           ports:
-           - containerPort: 80
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
