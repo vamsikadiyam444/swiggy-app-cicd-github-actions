@@ -19,11 +19,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository (disable default bot credentials)
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          persist-credentials: false
 
       # 2. Setup Node.js
       - name: Setup Node.js
@@ -69,22 +67,12 @@ jobs:
         run: |
           sed -i "s|image: .*|image: $ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml
 
-      # 10. Commit and push updated deployment.yaml using PAT
-      - name: Commit updated deployment
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add k8s/deployment.yaml
-          git commit -m "Update deployment image to $IMAGE_TAG [skip ci]" || echo "No changes to commit"
-          git pull https://x-access-token:${{ secrets.GH_PAT }}@github.com/vamsikadiyam444/swiggy-app-cicd-github-actions.git main --rebase --autostash
-          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/vamsikadiyam444/swiggy-app-cicd-github-actions.git main
-
-      # 11. Update kubeconfig for EKS
+      # 10. Update kubeconfig for EKS
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
-      # 12. Apply Kubernetes manifests
+      # 11. Apply Kubernetes manifests
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/deployment.yaml -n $K8S_NAMESPACE
-          kubectl apply -f k8s/service.yaml -n $K8S_NAMESPACE
+          kubectl apply -f k8s/service.yaml -n $K8S_NAMESPACE 
