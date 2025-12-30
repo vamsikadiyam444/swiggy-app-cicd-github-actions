@@ -10,9 +10,8 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: 596660701410.dkr.ecr.us-east-1.amazonaws.com/my-app
-  K8S_NAMESPACE: swiggy
-  CLUSTER_NAME: my-eks-cluster
   K8S_DEPLOYMENT: swiggy-app
+  K8S_NAMESPACE: swiggy
 
 jobs:
   build-and-deploy:
@@ -23,7 +22,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup Node.js (if your app needs Node.js, remove if not)
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -62,21 +61,12 @@ jobs:
           docker push $ECR_REPOSITORY:$IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-      # 9️⃣ Update kubeconfig
-      - name: Update kubeconfig
-        run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
-
-      # 🔟 Deploy to EKS
-      - name: Deploy to EKS
+      # 9️⃣ Update deployment.yaml with new image
+      - name: Update deployment.yaml
         run: |
-          # Replace the image in deployment.yaml
-          sed -i "s|PLACEHOLDER|$ECR_REPOSITORY:$IMAGE_TAG|g" deployment.yaml
-          
-          # Ensure namespace exists
-          kubectl create namespace $K8S_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
-          
-          # Apply deployment
-          kubectl apply -f deployment.yaml -n $K8S_NAMESPACE
-
-          # Optionally, wait for rollout
-          kubectl rollout status deployment/$K8S_DEPLOYMENT -n $K8S_NAMESPACE
+          sed -i "s|image: .*|image: $ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add k8s/deployment.yaml
+          git commit -m "Update deployment image to $IMAGE_TAG"
+          git push origin main
