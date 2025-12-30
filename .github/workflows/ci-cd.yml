@@ -19,9 +19,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
+      # 1. Checkout repository with full history
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       # 2. Setup Node.js
       - name: Setup Node.js
@@ -74,6 +76,7 @@ jobs:
           git config user.email "actions@github.com"
           git add k8s/deployment.yaml
           git commit -m "Update deployment image to $IMAGE_TAG [skip ci]" || echo "No changes to commit"
+          git pull origin main --rebase
           git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/vamsikadiyam444/swiggy-app-cicd-github-actions.git main
 
       # 11. Update kubeconfig for EKS
@@ -85,3 +88,4 @@ jobs:
         run: |
           kubectl apply -f k8s/deployment.yaml -n $K8S_NAMESPACE
           kubectl apply -f k8s/service.yaml -n $K8S_NAMESPACE
+
