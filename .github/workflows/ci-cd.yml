@@ -65,13 +65,27 @@ jobs:
       # 9. Update deployment manifest with new image
       - name: Update deployment image
         run: |
+          # Replace image placeholder
           sed -i "s|image: .*|image: $ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml
+          # Add a comment line to trigger workflow change
+          echo "# Workflow trigger update $(date)" >> k8s/deployment.yaml
 
-      # 10. Update kubeconfig for EKS
+      # 10. Commit updated deployment.yaml back to repo
+      - name: Commit updated deployment.yaml
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/deployment.yaml
+          git commit -m "Update deployment image to $IMAGE_TAG [skip ci]" || echo "No changes to commit"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 11. Update kubeconfig for EKS
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
-      # 11. Apply Kubernetes manifests
+      # 12. Apply Kubernetes manifests
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/deployment.yaml -n $K8S_NAMESPACE
