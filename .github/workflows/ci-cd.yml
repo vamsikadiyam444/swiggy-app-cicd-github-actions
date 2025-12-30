@@ -1,8 +1,5 @@
 name: CI/CD Pipeline for Swiggy App
 
-permissions:
-  contents: write   # gives permission to push back to repo
-
 on:
   push:
     branches: [ main ]
@@ -22,58 +19,63 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # 4️⃣ Run tests
       - name: Run tests
         run: npm test
 
+      # 5️⃣ Build project
       - name: Build project
         run: npm run build
 
-      - name: Configure AWS credentials
+      # 6️⃣ Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # 7️⃣ Login to Amazon ECR
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      # 8️⃣ Build and push Docker image
       - name: Build and push Docker image
         run: |
           IMAGE_TAG=${GITHUB_SHA}
           echo "Using image tag: $IMAGE_TAG"
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REPOSITORY:$IMAGE_TAG
+
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-      - name: Update deployment.yaml image
+      # 9️⃣ Update kubeconfig for EKS
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+
+      # 🔟 Replace image in deployment.yaml
+      - name: Update deployment image
         run: |
           sed -i "s|image: .*|image: $ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml
 
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add k8s/deployment.yaml
-          git commit -m "Update deployment image to $IMAGE_TAG" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
-
-      - name: Update kubeconfig
-        run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
-
-      - name: Deploy to EKS
+      # 1️⃣1️⃣ Apply Kubernetes manifests
+      - name: Deploy to Kubernetes (via ArgoCD)
         run: |
-          CONTAINER_NAME=$(kubectl get deployment $K8S_DEPLOYMENT -n $K8S_NAMESPACE \
-            -o jsonpath='{.spec.template.spec.containers[0].name}')
-
-          kubectl set image deployment/$K8S_DEPLOYMENT \
-            $CONTAINER_NAME=$ECR_REPOSITORY:$IMAGE_TAG -n $K8S_NAMESPACE
+          # Apply manifests to the cluster (ArgoCD can also watch this namespace)
+          kubectl apply -f k8s/deployment.yaml -n $K8S_NAMESPACE
+          kubectl apply -f k8s/service.yaml -n $K8S_NAMESPACE
