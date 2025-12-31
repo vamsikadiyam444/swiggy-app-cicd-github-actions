@@ -19,31 +19,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
+      # 1️⃣ Checkout repository (disable default GitHub Actions credentials)
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
-      # 2. Setup Node.js
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # 3. Install dependencies
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # 4. Run tests
+      # 4️⃣ Run tests
       - name: Run tests
         run: npm test
 
-      # 5. Build project
+      # 5️⃣ Build project
       - name: Build project
-        run: |
-          # This is a comment to trigger workflow push
-          npm run build
+        run: npm run build
 
-      # 6. Configure AWS credentials (IAM)
+      # 6️⃣ Configure AWS credentials (IAM)
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -51,11 +51,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_IAM }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 7. Login to Amazon ECR
+      # 7️⃣ Login to Amazon ECR
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 8. Build and push Docker image
+      # 8️⃣ Build and push Docker image
       - name: Build and push Docker image
         run: |
           IMAGE_TAG=${GITHUB_SHA}
@@ -64,16 +64,25 @@ jobs:
           docker push $ECR_REPOSITORY:$IMAGE_TAG
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-      # 9. Update deployment manifest with new image
+      # 9️⃣ Update deployment manifest with new image
       - name: Update deployment image
         run: |
           sed -i "s|image: .*|image: $ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml
 
-      # 10. Update kubeconfig for EKS
+      # 🔟 Commit and push updated deployment.yaml using PAT
+      - name: Commit updated deployment
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add k8s/deployment.yaml
+          git commit -m "Update deployment image to $IMAGE_TAG [skip ci]" || echo "No changes to commit"
+          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/vamsikadiyam444/swiggy-app-cicd-github-actions.git main
+
+      # 11️⃣ Update kubeconfig for EKS
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
-      # 11. Apply Kubernetes manifests
+      # 12️⃣ Apply Kubernetes manifests
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/deployment.yaml -n $K8S_NAMESPACE
