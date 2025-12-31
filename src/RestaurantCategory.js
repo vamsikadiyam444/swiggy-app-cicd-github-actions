@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ItemList from "./compnents/ItemList";
+import ItemList from "./components/ItemList";
 
 const RestaurantCategory = ({data ,showItems , setShowIndex}) => {
 
