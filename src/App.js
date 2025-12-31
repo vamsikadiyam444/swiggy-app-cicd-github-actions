@@ -1,14 +1,14 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-// Import your existing components
-import Header from "./src/compnents/Header";
-import Body from "./src/compnents/Body";
-import Cart from "./src/compnents/Cart";
-import About from "./src/compnents/About";
-import ContactUs from "./src/compnents/ContactUs";
-import RestaurantMenu from "./src/compnents/RestaurantMenu";
-import Error from "./src/compnents/Error";
+// Components are in the components folder
+import Header from "./components/Header";
+import Body from "./components/Body";
+import Cart from "./components/Cart";
+import About from "./components/About";
+import ContactUs from "./components/ContactUs";
+import RestaurantMenu from "./components/RestaurantMenu";
+import Error from "./components/Error";
 
 function App() {
   return (
