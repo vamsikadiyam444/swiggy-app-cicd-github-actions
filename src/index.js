@@ -1,4 +1,4 @@
-import React fromi "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";  // Path to your App.js
 import { HashRouter as Router } from "react-router-dom";
@@ -9,4 +9,3 @@ root.render(
         <App />
     </Router>
 );
-
