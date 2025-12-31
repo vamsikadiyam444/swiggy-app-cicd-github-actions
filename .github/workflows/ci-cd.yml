@@ -39,7 +39,9 @@ jobs:
 
       # 5. Build project
       - name: Build project
-        run: npm run build
+        run: |
+          # This is a comment to trigger workflow push
+          npm run build
 
       # 6. Configure AWS credentials (IAM)
       - name: Configure AWS Credentials
@@ -75,4 +77,4 @@ jobs:
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/deployment.yaml -n $K8S_NAMESPACE
-          kubectl apply -f k8s/service.yaml -n $K8S_NAMESPACE 
+          kubectl apply -f k8s/service.yaml -n $K8S_NAMESPACE
