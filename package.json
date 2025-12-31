@@ -19,7 +19,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "parcel index.html",
-    "build": "parcel build index.html",
+    "build": "parcel build index.html --public-url ./",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "test": "jest",
@@ -47,4 +47,3 @@
     "tailwindcss": "^4.1.11"
   }
 }
-
