@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+
+
+/* .header {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid black;
+}
+
+.logo {
+    width: 100px;
+}
+
+.nav-items {
+    
+}
+
+.nav-items ul {
+    display: flex;
+    list-style-type: none;
+}
+.ul-items {
+     padding: 10px 10px;
+    margin: 10px;
+}
+
+.nav-items ul li {
+    padding: 10px 10px;
+    margin: 10px;
+}
+
+.res-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.res-logo {
+   width: 200px;
+   height: 150px;
+   object-fit: cover;
+   border-radius: 10px;
+ 
+}
+
+.res-card {
+    padding: 5px;
+    width: 200px;
+    margin-top : 0px;
+}
+
+.res-card:hover {
+    border: 1px solid black;
+    cursor: pointer;
+
+}
+
+.res-btn {
+    margin: 10px;
+    cursor: pointer;
+}
+
+.shimmer-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.shimmer-card {
+    margin: 20px;
+    width: 200px;
+    height: 400px;
+    background-color:#f0f0f0;
+    
+}
+
+.login-btn {
+    margin: 0px 20px;
+    width: 80px;
+    cursor: pointer;
+}
+
+.login:hover {
+    border: 1px solid black;
+
+}
+
+.user-item {
+    padding: 10px;
+    border: 1px solid black;
+} */
