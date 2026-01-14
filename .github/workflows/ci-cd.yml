@@ -9,7 +9,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: 596660701410.dkr.ecr.us-east-1.amazonaws.com/my-app
+  ECR_REPOSITORY: 529589763090.dkr.ecr.us-east-1.amazonaws.com/my-app-repo
   K8S_NAMESPACE: swiggy
   CLUSTER_NAME: my-eks-cluster
   K8S_DEPLOYMENT: swiggy-app
