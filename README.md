@@ -3,7 +3,7 @@
 This project demonstrates how to containerize, deploy, and manage a full-stack Swiggy-like app using modern DevOps practices.
 We implement:
 
-CI/CD with Jenkins → build & push Docker images to Amazon ECR
+CI/CD with github actions  → build & push Docker images to Amazon ECR
 
 GitOps with Argo CD → automatically sync Kubernetes manifests from GitHub
 
@@ -75,7 +75,19 @@ kubectl -n argocd port-forward svc/argocd-server 8443:443
 
 ```
 
-# Step 5 — DNS (Route 53) & HTTPS
+# Step 5 - Monitoring & Observability
+
+Implemented Prometheus for metrics collection.
+
+Used Grafana dashboards to monitor:
+
+Application performance
+
+Cluster health
+
+Resource utilization
+
+# Step 6 — DNS (Route 53) & HTTPS
 
 After service is created on EKS, find the ALB hostname:
 
@@ -87,6 +99,7 @@ kubectl get svc swiggy-app -n default
 ```
 
 ![Pipeline Diagram](images/pipeline.png)
+
 
 
 
